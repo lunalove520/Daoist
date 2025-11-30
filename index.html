@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>異人研究院 - 符咒與過功儀式全集</title>
+    <title>異人研究院 - 符咒生效原理及注意事項（完整全收錄版）</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,7 +26,7 @@
             font-family: 'Noto Sans TC', sans-serif;
             background-image: url("https://www.transparenttextures.com/patterns/cream-paper.png");
             overflow-x: hidden;
-            line-height: 2;
+            line-height: 2; /* 寬鬆行高，適合閱讀長文 */
         }
 
         h1, h2, h3, h4, .serif {
@@ -45,51 +45,61 @@
             transition: width 0.1s;
         }
 
-        /* 文章樣式 */
+        /* 長文排版樣式 */
         .article-content p {
             margin-bottom: 1.5rem;
             text-align: justify;
         }
         
+        /* 內部小標題 */
         .article-subtitle {
             font-family: 'Noto Serif TC', serif;
             font-weight: 700;
             font-size: 1.25rem;
             color: var(--color-accent);
-            margin-top: 3rem;
-            margin-bottom: 1.5rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            border-bottom: 1px solid var(--color-border);
-            padding-bottom: 0.5rem;
+        }
+        .article-subtitle::before {
+            content: '';
+            display: block;
+            width: 4px;
+            height: 1.25rem;
+            background-color: var(--color-accent);
         }
 
-        .highlight-box {
-            background-color: rgba(140, 50, 36, 0.03);
-            border-left: 3px solid var(--color-accent);
-            padding: 1.5rem;
+        /* 引用/重點區塊 */
+        .quote-box {
+            position: relative;
+            padding: 2rem;
             margin: 2rem 0;
+            background-color: rgba(44, 36, 32, 0.03);
+            border-left: 2px solid var(--color-accent);
+            font-family: 'Noto Serif TC', serif;
         }
         
-        .quote-block {
-            font-family: 'Noto Serif TC', serif;
-            font-style: italic;
-            padding: 1.5rem;
-            background: #fff;
-            border: 1px solid var(--color-border);
-            margin: 2rem 0;
-            position: relative;
+        /* 列表樣式 */
+        .custom-list {
+            counter-reset: list-counter;
         }
-        .quote-block::before {
-            content: '“';
+        .custom-list li {
+            position: relative;
+            padding-left: 3rem;
+            margin-bottom: 1rem;
+        }
+        .custom-list li::before {
+            counter-increment: list-counter;
+            content: counter(list-counter, decimal-leading-zero);
             position: absolute;
-            top: -1rem;
-            left: 1rem;
-            font-size: 4rem;
+            left: 0;
+            top: 0.2rem;
+            font-family: 'Noto Serif TC', serif;
+            font-weight: bold;
             color: var(--color-accent);
-            opacity: 0.2;
-            line-height: 1;
+            font-size: 0.9rem;
         }
 
         /* 手風琴動畫 */
@@ -106,30 +116,6 @@
             0%    {opacity: 0; transform: translateY(-10px)}
             100%  {opacity: 1; transform: translateY(0)}
         }
-
-        /* 分頁切換動畫類 */
-        .page-enter {
-            animation: fadeIn 0.5s ease-out forwards;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Tab 按鈕激活狀態 */
-        .tab-active {
-            background-color: #2C2420;
-            color: #EAE6DE;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        .tab-inactive {
-            background-color: transparent;
-            color: #5C4D46;
-        }
-        .tab-inactive:hover {
-            background-color: rgba(44, 36, 32, 0.05);
-            color: #2C2420;
-        }
     </style>
 </head>
 <body class="antialiased pb-24">
@@ -137,485 +123,363 @@
     <!-- 閱讀進度條 -->
     <div id="progress-bar"></div>
 
-    <!-- 頂部導航 (切換卷) -->
-    <nav class="fixed top-0 w-full z-40 bg-[#EAE6DE]/95 backdrop-blur-md border-b border-[#D6CDC5] shadow-sm transition-all duration-300" id="navbar">
-        <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="serif text-xs font-bold tracking-[0.2em] text-[#3E2B26] uppercase hidden md:block">
-                異人研究院xLuna寵物溝通師
-            </div>
-            
-            <!-- 分頁 Tab -->
-            <div class="flex space-x-1 mx-auto md:mx-0 bg-[#D6CDC5]/30 p-1 rounded-full">
-                <button onclick="switchTab(1)" id="tab-1" class="tab-active px-5 py-2 rounded-full text-xs md:text-sm font-bold transition-all duration-300 serif tracking-widest">
-                    卷一 · 符咒
-                </button>
-                <button onclick="switchTab(2)" id="tab-2" class="tab-inactive px-5 py-2 rounded-full text-xs md:text-sm font-bold transition-all duration-300 serif tracking-widest">
-                    卷二 · 過功
-                </button>
-            </div>
-
-            <button id="menu-btn" class="p-2 text-[#2C2420] hover:text-[#8C3224] transition-colors md:ml-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-                </svg>
-            </button>
+    <!-- 導航 (Mobile Sticky) -->
+    <nav class="fixed top-0 w-full z-40 px-4 py-3 bg-[#EAE6DE]/95 backdrop-blur-sm border-b border-[#D6CDC5] flex justify-between items-center shadow-sm">
+        <div class="serif text-xs font-bold tracking-[0.2em] text-[#3E2B26] uppercase">
+            異人研究院 · 完整文檔
         </div>
+        <button id="menu-btn" class="p-2 text-[#2C2420] hover:text-[#8C3224] transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+        </button>
     </nav>
 
-    <!-- 側邊目錄 (動態生成) -->
+    <!-- 側邊目錄 -->
     <div id="sidebar" class="fixed inset-0 bg-[#2C2420] z-50 transform translate-x-full transition-transform duration-500 flex flex-col justify-center items-center text-[#EAE6DE] space-y-6 overflow-y-auto py-10">
         <button id="close-menu" class="absolute top-6 right-6 p-2 text-[#EAE6DE]">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
         </button>
-        <div class="text-xs tracking-[0.3em] opacity-50 mb-4 border-b border-[#EAE6DE]/30 pb-2">本卷目錄</div>
-        <div id="sidebar-links" class="flex flex-col space-y-4 text-center">
-            <!-- JS 將根據當前卷填充此處 -->
-        </div>
+        <div class="text-xs tracking-[0.3em] opacity-50 mb-4 border-b border-[#EAE6DE]/30 pb-2">目錄索引</div>
+        <a href="#intro" class="menu-link text-xl serif hover:text-[#8C3224]">常規製作及原理</a>
+        <a href="#function" class="menu-link text-xl serif hover:text-[#8C3224]">意義與作用</a>
+        <a href="#eye" class="menu-link text-xl serif hover:text-[#8C3224]">一・目光感應</a>
+        <a href="#endowment" class="menu-link text-xl serif hover:text-[#8C3224]">二・賦予法則</a>
+        <a href="#principle" class="menu-link text-xl serif hover:text-[#8C3224]">三・生效原理與誤解</a>
+        <a href="#qa" class="menu-link text-xl serif hover:text-[#8C3224]">四・禁忌與問答</a>
     </div>
 
-    <!-- 內容容器 -->
-    <main class="max-w-3xl mx-auto px-6 pt-28 min-h-screen">
-        
-        <!-- ======================= 卷一：符咒篇 (保留原內容) ======================= -->
-        <article id="volume-1" class="page-enter">
-            <header class="py-12 text-center border-b-4 border-[#2C2420] mb-12">
-                <div class="inline-block border border-[#8C3224] px-3 py-1 text-xs text-[#8C3224] tracking-widest uppercase mb-4">
-                    Vol. 01
+    <!-- Header / Cover -->
+    <header class="relative pt-24 pb-12 px-6 border-b-8 border-[#2C2420] bg-[#FDFBF7]">
+        <div class="max-w-3xl mx-auto text-center space-y-6">
+            <div class="inline-block border border-[#8C3224] px-3 py-1 text-xs text-[#8C3224] tracking-widest uppercase">
+                Internal Document
+            </div>
+            
+            <h1 class="text-3xl md:text-5xl serif font-black text-[#2C2420] leading-snug">
+                符咒<br>
+                <span class="font-normal text-2xl md:text-4xl italic text-[#5C4D46]">生效原理及注意事項</span>
+            </h1>
+
+            <div class="w-16 h-[2px] bg-[#2C2420] mx-auto my-4"></div>
+
+            <p class="text-sm text-[#5C4D46] font-medium tracking-wide">
+                異人研究院（金瀾言卿）
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto px-6 space-y-20 py-12">
+
+        <!-- 0. 常規製作及原理釋義 -->
+        <section id="intro" class="article-content reveal-on-scroll">
+            <h2 class="text-2xl serif font-bold text-[#2C2420] border-b border-[#D6CDC5] pb-2 mb-6">常規製作及原理釋義</h2>
+            
+            <p>「符咒」是符圖與咒語的合稱，道教溝通人神的契印憑證和隱言秘訣，實質是與神靈溝通的媒介。</p>
+            
+            <div class="grid md:grid-cols-2 gap-4 mb-6">
+                <div class="bg-[#fff] p-4 border border-[#D6CDC5] shadow-sm">
+                    <strong class="text-[#8C3224] serif text-lg block mb-2">「符」</strong>
+                    <p class="text-sm m-0 text-justify">是用朱筆（朱砂筆，紅色）或墨筆（黑朱砂，黑色）所畫，內容有特殊字或符號，變形字，組合字，圖或字圖結合等，是一種特殊的文字和圖形的結合，代表通神的憑證，是徵兆，是印證符合之意。</p>
                 </div>
-                <h1 class="text-4xl md:text-5xl serif font-black text-[#2C2420] leading-snug mb-4">
-                    符咒生效原理<br>及注意事項
-                </h1>
-                <p class="text-sm text-[#5C4D46] font-medium tracking-wide">
-                    溝通人神的契印憑證 · 隱言秘訣
-                </p>
-            </header>
-
-            <div class="article-content space-y-12">
-                <!-- 0. 定義 -->
-                <section id="v1-intro">
-                    <h2 class="text-2xl serif font-bold text-[#2C2420] mb-6">常規製作及原理釋義</h2>
-                    <p>「符咒」是符圖與咒語的合稱，道教溝通人神的契印憑證和隱言秘訣，實質是與神靈溝通的媒介。</p>
-                    <div class="grid md:grid-cols-2 gap-4 mb-6">
-                        <div class="bg-white p-4 border border-[#D6CDC5] shadow-sm">
-                            <strong class="text-[#8C3224] serif text-lg block mb-2">「符」</strong>
-                            <p class="text-sm m-0">是用朱筆或墨筆所畫，內容有特殊字或符號... 代表通神的憑證，是徵兆，是印證符合之意。</p>
-                        </div>
-                        <div class="bg-white p-4 border border-[#D6CDC5] shadow-sm">
-                            <strong class="text-[#8C3224] serif text-lg block mb-2">「咒」</strong>
-                            <p class="text-sm m-0">指的是具有特殊音頻效應的口訣，是真言，是神的言辭，是人與神靈交流的音頻訊號。</p>
-                        </div>
-                    </div>
-                    <div class="highlight-box">
-                        <p class="serif font-bold text-lg mb-2">「書符不效，卻被鬼笑，書符不靈，倒被鬼驚。」</p>
-                        <p class="text-sm m-0">書符的結果只是畫符有形而無其神，照葫蘆畫瓢那便成了「鬼畫符」，描得再像也不會靈驗。</p>
-                    </div>
-                </section>
-
-                <!-- 1. 作用 -->
-                <section id="v1-function">
-                    <h2 class="text-2xl serif font-bold text-[#2C2420] mb-6">意義與作用</h2>
-                    <ul class="list-decimal pl-5 space-y-2 marker:text-[#8C3224] marker:font-serif">
-                        <li>護身保命，有了保護傘，做事才順利。</li>
-                        <li>化解問題，保護魂魄在三界之內不受干擾，出符是有針對性的解決問題。</li>
-                        <li>法事用，調風水用。</li>
-                        <li>可以測試緣份。</li>
-                        <li>兵符是三界通行證，調兵遣將去辦事，保證法事的成功和順利。</li>
-                    </ul>
-                    <div class="mt-8 bg-[#2C2420] text-[#EAE6DE] p-6 rounded-sm">
-                        <h4 class="serif font-bold mb-2 text-[#D6CDC5]">異人研究院 —— 五雷符</h4>
-                        <p class="text-sm m-0">在我們異人研究院中，「五雷符」顯得尤為獨特... 自夏至之後至冬至之前，這一步驟便可省略，因為最原始的符刻牌本身即具備「法器」屬性，可直接進行刻印。</p>
-                    </div>
-                </section>
-
-                <!-- 2. 目光感應 -->
-                <section id="v1-eye">
-                    <h2 class="text-2xl serif font-bold text-[#2C2420] mb-6">一．目光感應</h2>
-                    <p>目光蘊含著我們的信念與精微能量。當被人注視時，我們可以追溯其源頭，回望過去。</p>
-                    <p>它們遵循一條規則：<span class="font-bold text-[#8C3224]">動物本身的能量越強，其目光就越熾熱，能夠帶動的外界精微能量也就越多。</span></p>
-                    <p>熾熱目光的根本原因在於「信念」二字。意識越凝聚、越清晰，目光就越熾熱。</p>
-                    <h3 class="article-subtitle">神光與實體化</h3>
-                    <p>目光攜帶著信念，當注視物體時，會對其施加一種無形氣場... 這是因為遵循一條規則：<span class="font-bold">人間越虛幻之物，在鬼神世界中越顯實體化。</span></p>
-                </section>
-
-                <!-- 3. 賦予法則 -->
-                <section id="v1-endowment">
-                    <h2 class="text-2xl serif font-bold text-[#2C2420] mb-6">二．賦予法則</h2>
-                    <p>「信」是被主人祝福並賦予其上的信息象徵。例如，虎符能夠調兵遣將，這並非因其材質，而是因為「信」——信念。</p>
-                    <div class="bg-white p-6 border-l-4 border-[#8C3224] my-6">
-                        <p class="font-bold mb-2">舉例來說：</p>
-                        <ul class="list-disc pl-5 text-sm m-0">
-                            <li>葫蘆諧音「福祿」象徵福氣；</li>
-                            <li>蘋果諧音「平」象徵平安；</li>
-                            <li>酒、手錶、豪車成為身份象徵。</li>
-                        </ul>
-                    </div>
-                    <p>賦予法則，是「信」的起點，是一切精神象徵的初始，也是借助自然力量的手段。</p>
-                </section>
-
-                <!-- 4. 生效原理 -->
-                <section id="v1-principle">
-                    <h2 class="text-2xl serif font-bold text-[#2C2420] mb-6">三．生效原理與誤解</h2>
-                    <p class="text-xl serif font-bold text-[#8C3224] text-center my-8">符咒的生效依賴於堅定的信念。</p>
-                    <p>信念的穩固與否直接決定了符力的強弱... 符咒真正能夠溝通天地的關鍵，並不僅僅在於單純的信念，更在於手法與先賢們的智慧相契合。</p>
-                    
-                    <h3 class="article-subtitle">畫符的誤解與正解</h3>
-                    <p>符咒是否有效，關鍵在於兩點：德行與信念。只要注入信念，皆可成符。</p>
-                    <p>有些人畫符時草率敷衍... 還有些人一味依賴祖師加持，忽視自身德行的修煉。誠然，觀想祖師確有其效，但需以個人功德為基礎。</p>
-                </section>
-
-                <!-- 5. 禁忌 -->
-                <section id="v1-qa">
-                    <h2 class="text-2xl serif font-bold text-[#2C2420] mb-6">四．禁忌與注意事項</h2>
-                    <div class="space-y-4">
-                        <details class="group bg-white border border-[#D6CDC5] rounded-sm">
-                            <summary class="flex justify-between p-4 cursor-pointer bg-[#F9F7F5]">
-                                <span class="font-bold">Q. 符放在手機殼後效果減少一半？</span>
-                                <span class="text-[#8C3224] group-open:rotate-180 transition-transform">▼</span>
-                            </summary>
-                            <div class="p-4 text-sm border-t border-[#D6CDC5]">
-                                A: 現代電子設備運行時會產生特定頻率的電磁場，與符咒靈力場形成疊加或抵消效應，導致能量分佈紊亂。
-                            </div>
-                        </details>
-                        <details class="group bg-white border border-[#D6CDC5] rounded-sm">
-                            <summary class="flex justify-between p-4 cursor-pointer bg-[#F9F7F5]">
-                                <span class="font-bold">Q. 符為什麼不能放在屁股口袋？</span>
-                                <span class="text-[#8C3224] group-open:rotate-180 transition-transform">▼</span>
-                            </summary>
-                            <div class="p-4 text-sm border-t border-[#D6CDC5]">
-                                A: 臀部形成相對封閉的能量凹陷區，且屬於「濁氣下沉」的末端，易沾染濁氣。
-                            </div>
-                        </details>
-                        <details class="group bg-white border border-[#D6CDC5] rounded-sm">
-                            <summary class="flex justify-between p-4 cursor-pointer bg-[#F9F7F5]">
-                                <span class="font-bold">Q. 符被破壞或弄丟怎麼辦？</span>
-                                <span class="text-[#8C3224] group-open:rotate-180 transition-transform">▼</span>
-                            </summary>
-                            <div class="p-4 text-sm border-t border-[#D6CDC5]">
-                                A: 受損需焚化並重置能量；丟失需用艾草水清潔並佈陣防護。佩戴符咒一年後需朝東方燒掉。
-                            </div>
-                        </details>
-                    </div>
-                </section>
-
-                <div class="text-center py-8">
-                    <button onclick="switchTab(2)" class="bg-[#2C2420] text-[#EAE6DE] px-8 py-3 rounded-full hover:bg-[#8C3224] transition-colors serif tracking-widest">
-                        下一卷：過功儀式 →
-                    </button>
+                <div class="bg-[#fff] p-4 border border-[#D6CDC5] shadow-sm">
+                    <strong class="text-[#8C3224] serif text-lg block mb-2">「咒」</strong>
+                    <p class="text-sm m-0 text-justify">指的是具有特殊音頻效應的口訣，是真言，是神的言辭，是人與神靈交流的音頻訊號。</p>
                 </div>
             </div>
-        </article>
 
-        <!-- ======================= 卷二：過功篇 (新增內容) ======================= -->
-        <article id="volume-2" class="hidden page-enter">
-            <header class="py-12 text-center border-b-4 border-[#2C2420] mb-12">
-                <div class="inline-block border border-[#8C3224] px-3 py-1 text-xs text-[#8C3224] tracking-widest uppercase mb-4">
-                    Vol. 02
-                </div>
-                <h1 class="text-4xl md:text-5xl serif font-black text-[#2C2420] leading-snug mb-4">
-                    過功儀式<br>原理及注意事項
-                </h1>
-                <p class="text-sm text-[#5C4D46] font-medium tracking-wide">
-                    傳承閉環 · 身份認證 · 能量通道
+            <p>符咒是通過圖形、文字或者語言來存儲書符者強大的意念，來實現某種要求的能量表現形式，可以通過焚燒，佩戴，擺放具體位置等釋放這種訊號。</p>
+
+            <div class="quote-box">
+                <p class="text-xl leading-relaxed text-[#2C2420] mb-2 font-bold">
+                    「書符不效，卻被鬼笑，<br>書符不靈，倒被鬼驚。」
                 </p>
-            </header>
+                <p class="text-sm text-[#5C4D46] m-0 italic">
+                    書符的結果只是畫符有形而無其神，照葫蘆畫瓢那便成了「鬼畫符」，描得再像也不會靈驗。
+                </p>
+            </div>
 
-            <div class="article-content space-y-16">
+            <p>書符有一套完整的形式規矩，絕對不可以隨隨便便的胡亂書寫，貽笑大方不說，那樣子也絕對不可能「書符」成功。</p>
+            <p>這一點，每一位修符篆的道友都能共情，一道符的修成需要很多步驟，具體內容這裡就不講了，還需要神壇祭煉，有些還需要49天一個週期等等的各種戒律，一道符便修成，接著修下一道。</p>
+        </section>
+
+        <!-- 意義與作用 -->
+        <section id="function" class="article-content reveal-on-scroll">
+            <h3 class="article-subtitle">畫符、出符的意義和作用在於：</h3>
+            <ul class="custom-list space-y-2 pl-0">
+                <li>護身保命，有了保護傘，做事才順利。</li>
+                <li>化解問題，保護魂魄在三界之內不受干擾，出符是有針對性的解決問題。</li>
+                <li>法事用，調風水用。</li>
+                <li>可以測試緣份。</li>
+                <li>兵符是三界通行證，調兵遣將去辦事，保證法事的成功和順利。</li>
+            </ul>
+
+            <p class="mt-8">淘寶網上很多店僅憑一道符就銷售收入上百萬元，經久不衰，也證明經過道家秘術繪製、祭煉的靈符確實靈驗。</p>
+            <p>符咒是接通天地能量場、溝通靈界信息的重要載體和訊號，畫符要想靈驗，要求繪符人有一定的道行和功力，繪符前必須有特定的儀式和秘咒，畫好的符必須經過祭煉，這套繪符秘法向來只有入室弟子才有機會觀之一二，都是師父口傳心授的不傳之秘。</p>
+            <p>畫符是學習道法的基本功，但外行人根本不知道畫符需要練符功，只知道照本宣科照葫蘆畫瓢，豈不知畫符的精華是功法，內有功法，畫符才靈。</p>
+            
+            <div class="bg-[#F4F1ED] p-5 rounded text-sm text-[#5C4D46] border border-[#D6CDC5] my-6">
+                <p class="mb-4 font-bold text-[#2C2420]">基礎修煉要求：</p>
+                <p>最基礎的符法修煉祭練週期49天一種符式，須齋戒浴身，淨口（禁葷酒），備辦果，酒，香，焚香，祝告，禮拜。</p>
+                <p class="mb-0">敕水，敕紙，敕筆，掐決念咒，存想，取炁，結煞等等，前三步驟置辦畫符用具，更為嚴苛，水取端午節午時至陽之水，紙需手工裁剪，裁紙刀需供奉開光除戾，墨的調配就更加嚴苛：黑狗，白雞，胎毛，各類礦石原料及中草藥等等。</p>
+            </div>
+
+            <div class="border-l-4 border-[#2C2420] pl-4 my-8">
+                <h4 class="serif font-bold text-lg mb-2">異人研究院 —— 五雷符</h4>
+                <p class="text-sm">在我們異人研究院中，「五雷符」顯得尤為獨特。它與前述符咒繪製步驟相似，但在特定日期製作時，需額外繪製一道步驟。然而，自夏至之後至冬至之前，這一步驟便可省略，因為最原始的符刻牌本身即具備「法器」屬性，可直接進行刻印。</p>
+            </div>
+
+            <p class="italic text-sm text-center text-[#8C3224] mt-6">後面的內容和大家分享一些關於符咒秘匙的知識理論，大家就會更明白其原理作用。</p>
+        </section>
+
+        <!-- 一．目光感應 -->
+        <section id="eye" class="article-content reveal-on-scroll border-t border-[#D6CDC5] pt-12">
+            <h2 class="text-3xl serif font-black text-[#2C2420] mb-8">一．《目光感應》</h2>
+
+            <p>目光蘊含著我們的信念與精微能量。當被人注視時，我們可以追溯其源頭，回望過去。</p>
+            <p>目光不僅限於人類的目光，還包括獸類如虎、獅、熊，以及禽類如雞、鴨、鵝等。</p>
+            <p>它們遵循一條規則：<span class="font-bold text-[#8C3224]">動物本身的能量越強，其目光就越熾熱，能夠帶動的外界精微能量也就越多。</span></p>
+            <p>熾熱目光的根本原因在於「信念」二字。意識越凝聚、越清晰，目光就越熾熱。當意識清晰，停止紛亂的想法，我們便能靜下心來，撇開多余的雜念，專注於一心一念。</p>
+            <p>如果你的信念足夠強大，甚至強過被注視之人，那麼即便不直接看向對方，對方也會感應到並望向你。</p>
+            
+            <h3 class="article-subtitle">偵查與反偵查</h3>
+            <p>在近距離時，我們很快就能察覺到是誰在注視自己，感受到其目光的灼熱。然而，在遠距離時，這種感覺就變得不明顯了。這是因為信念牽動的氣不足以延伸至遠距離的人身上，無法形成一個點對點的發射關係。</p>
+            <p>了解了這一點，我們便能對外界的探知保持警惕，防止被他人設下氣息標記並加以追踪。</p>
+            <p>警惕探知僅為初級階段，而對目光和環境的掌控運用至高級境界時，便能反探知於視線的主人。</p>
+            <p>無需回望，僅憑外界氣息的微妙變動，便可洞悉觀察者的意圖和動向。</p>
+            <ul class="list-disc pl-5 space-y-1 mb-6 text-sm text-[#5C4D46]">
+                <li>一是能感知其自身氣息的優劣</li>
+                <li>二是能探知其心念動機</li>
+                <li>三是能依據氣息的流向和速度，判斷其發動攻擊的時機</li>
+            </ul>
+            <p>長期練習偵查與反偵查技巧的人，通常具備這種能力，但對於心通之人而言，這仍顯不足。心通之人不僅能通過目光，還能借助花草樹木、雲朵風向、振動光暗等自然元素，探知他人的信息。</p>
+
+            <h3 class="article-subtitle">神光與實體化</h3>
+            <p>目光攜帶著信念，當注視物體時，會對其施加一種無形氣場，這種氣場肉眼不可見，卻能為鬼神所察覺。</p>
+            <p>這是因為遵循一條規則：<span class="font-bold text-[#2C2420]">人間越虛幻之物，在鬼神世界中越顯實體化。</span></p>
+            <p>目光與信念，在鬼神世界中便是實體可見的存在。我們修行者將目光稱為「神光」，它屬純陽之質，對多數陰邪鬼魅而言，具有觀之即滅的威力。</p>
+            <p>若再加持信念的定向作用，通常能極大提升法器或符籙的威能，使其效力倍增。</p>
+            <p>對於心術不正之人，從其眼神目光中亦可窺見端倪。</p>
+            <p>中醫有言，眼睛匯聚了五臟六腑之精氣，因此，通過觀察眼睛，便能大致判斷一個人的氣息狀況。這是我們識人的獨特手段，不僅限於普通的面相法或行為細節分析。</p>
+        </section>
+
+        <!-- 二．賦予法則 -->
+        <section id="endowment" class="article-content reveal-on-scroll border-t border-[#D6CDC5] pt-12">
+            <h2 class="text-3xl serif font-black text-[#2C2420] mb-8">二．《賦予法則》</h2>
+
+            <p>「信」是被主人祝福並賦予其上的信息象徵。例如，虎符能夠調兵遣將，這並非因其材質，而是因為「信」——信念。</p>
+            <p>所謂「賦予」，是指人為地為某一物體添加標籤，使其具備象徵意義。</p>
+            <p>當我們使用或接近這些物體時，便會受到這些「被賦予」標籤的影響，進而影響我們的勇氣和意志，甚至影響整個人類社會的認定標準。</p>
+            <p>這些事物在初創之時，有的天然形成，有的由人工製造，逐漸附著上特定的信息，這就是信念的人為賦予，亦即祝福。</p>
+            
+            <div class="bg-[#F9F7F5] p-6 border-l-4 border-[#8C3224] my-6">
+                <p class="font-bold mb-2 text-[#2C2420]">舉例來說：</p>
+                <ul class="list-disc pl-5 space-y-1 mb-0 text-sm">
+                    <li>葫蘆因其諧音「福祿」而被視為吉祥物，象徵福氣和祿位；</li>
+                    <li>蘋果因諧音「平」，被看作平安之果；</li>
+                    <li>酒、手錶、豪車等，也逐漸成為身份和地位的象徵。</li>
+                </ul>
+            </div>
+
+            <p>這些都是人們「賦予」的意義。此外，還有祖輩口口相傳，逐漸形成的信仰及其對立的禁忌。</p>
+            <p>我們在尋找一個物體的「信」時，需要追溯其起源與由來，對其最初的含義有清晰的認識。這一步確保了我們與其是否具備連接的能力，以及信息傳輸的穩定性。</p>
+            <p>很多時候，一個不經意的念頭，隨性所至的附意，賦予了事物獨特的精神面貌，甚至能決定它們的存續時長。</p>
+            <p>例如，建立一個信仰，或指定一個「信物」，擁有並堅信它，最終能夠戰勝困難。</p>
+            <p>賦予法則，是「信」的起點，是一切精神象徵的初始，也是借助自然力量的手段。</p>
+            <p>熟悉符籙之道的人知曉，在開始畫符之際，需先祝筆，用心意與之連接，借助咒語對應的能量淨化它，以防沾染不良信息，其原理亦根植於此。</p>
+        </section>
+
+        <!-- 三．符的生效原理和認知框架 -->
+        <section id="principle" class="article-content reveal-on-scroll border-t border-[#D6CDC5] pt-12">
+            <h2 class="text-3xl serif font-black text-[#2C2420] mb-8">三．《符的生效原理和認知框架》</h2>
+
+            <p>畫符所需掌握的基礎思想框架在於，理解「符」即「符合」之意，意指天地與人的和諧相應。通過畫符這一手段，人得以與天地溝通，借助天地之力以達成事務。</p>
+
+            <h3 class="article-subtitle">生效的關鍵</h3>
+            <p>符咒生效的關鍵究竟是什麼？是依賴於優質的毛筆嗎？是取決於純天然的紙張嗎？亦或是講究的朱砂墨汁？</p>
+            <p>實際上，這些因素都是外在的，它們只是增強我們儀式感的工具。而儀式感在一定程度上反映了我們信念的堅定程度，但並非必須通過這些手段來實現。</p>
+            <p class="text-xl font-bold text-[#8C3224] text-center my-8">符咒的生效依賴於堅定的信念。</p>
+            <p>信念的穩固與否直接決定了符力的強弱，而符咒真正能夠溝通天地的關鍵，並不僅僅在於單純的信念，更在於手法與先賢們的智慧相契合。</p>
+            <p>唯有如此，方能借助先賢們開拓出的那條軌跡，這實質上是一種借力的方式。</p>
+            <p>然而，遺憾的是，現代人過於注重形式，將這種借助祖師先賢的方式視為首要，這實際上是一種誤解。</p>
+
+            <h3 class="article-subtitle">意志與集體意識</h3>
+            <p>為何認為網頁上以圖片形式呈現的符無效？原因在於，它所勾勒出的形態缺乏內在意志，僅僅是一張圖像。</p>
+            <p>儘管人們可以人為地賦予其意志，但大多數人並非法師，不懂得如何進行賦予。因此，許多人實際上並未真正使符生效。</p>
+            <p>在日常生活中，我們不難發現，只有當人們了解這是何種符，並且從心底深信不疑時，它才會產生一定的效果。然而，這種效果往往是雜亂的，因為人們並不了解其背後的原理。我相信各位能夠有所領悟，所謂信則有不信則無，心誠則靈之意。</p>
+            <p>在現實中，我們借助石頭的刻痕、磚頭的鑿磨、筆墨的揮灑，甚至鮮血的塗抹來繪製符咒，其本質原理殊途同歸——皆是通過信念來溝通那份無形之氣，寄託內心深處的信仰，將抽象的信念具象化。</p>
+            <p>當筆尖勾勒出特定的形態，形態便拘束了氣，而氣則能感應萬物。</p>
+            <p>而當信念變得純粹時，便會自然而然地與「集體意識」產生共鳴，使得符咒能夠脫離法師獨立運作，甚至被他人驅使。</p>
+            <p>這一切的前提是，這份信念能夠被他人同樣地發揮出來，即通過集體意識，成為法師精神的第二個身外化身。</p>
+            <p>如此一來，所書寫的符咒便能同樣生效。</p>
+            <p>這實際上屬於日常的持續加持，但大部分法師並不會提及這一點，他們或許只關注如何藉此獲利。一旦掌握了精神的複刻之法，手中的符咒便無需每次都依賴法師加持，自己也能在任何距離、任何時空中施展。</p>
+            <p>因此，法師能夠跨越萬里進行作法，其媒介正是那相同的信念。</p>
+            <p>符氣會隨時間消散於空間大氣中，有時，我們在畫符完成後吹一口氣，其作用在於既加持人氣，又淨化旁雜之氣，使符上充滿我們的氣息，從而相對隔絕外部緣氣，減少符力的消耗。</p>
+            <p>此時，若能再點上一支香，加持效果更會倍增。</p>
+            <p>如今我們所畫的符能融入空氣，而前人畫的符亦同樣瀰散於天地之間。當同樣一張符在相似的準備工作下施展時，便能借助前人的軌跡，進而加持於手中的符。</p>
+            <p>由此，我們掌握了符的生效與傳播原理，在學習符法之道上便會豁然開朗。</p>
+
+            <div class="w-full h-[1px] bg-[#D6CDC5] my-10"></div>
+            <h3 class="text-2xl text-center text-[#2C2420] serif font-bold my-8">關於畫符的誤解與正解</h3>
+            <div class="w-full h-[1px] bg-[#D6CDC5] my-10"></div>
+
+            <p>接下來，我們來探討一下當前市面上對畫符這一道術存在哪些誤解。符咒，乃是功德與信念相互交織、凝結於紙上的印記。每一個符字，都是精神的高度凝練與顯現。</p>
+            <p>因此，符咒是否有效，關鍵在於兩點：德行與信念。只要注入信念，皆可成符，但符咒的能量大小、影響範圍、有效時長等則有區別。</p>
+            <p>有些人畫符時草率敷衍，為了追求與符本相似，畫得模糊不清，需費時辨認才能識別其字跡。還有些人一味依賴祖師加持，忽視自身德行的修煉，遇事便求助於祖師暫借法力，而非依靠自身修為。</p>
+            <p>誠然，觀想祖師確有其效，但需以個人功德為基礎，絕非「祖師加持即可」這般簡單。歸根結底，祖師之力是外在的，而功德才是自身所擁有。</p>
+            <p>這便是所謂的內煉，以內煉為主，祖師之力為輔。</p>
+            <p>然而，現代廟觀中的一些人卻將此本末倒置了。</p>
+            <p>符，作為一種藝術品，追求的是美觀、簡潔、大氣，以及視覺上的舒適感。</p>
+            <p>有些人繪製符時，整頁佈滿文字，看似內容充實，實則會導致信念的注入分散，無法聚焦於核心思想。</p>
+            <p>因此，通常情況下，畫符應以簡潔明了為上策，就如同撰寫論文，無需過多的冗餘陳述，除非事情極為重大，已無法再進一步精煉。</p>
+            <p>有些人過分追求視覺美感，卻忽視了信念的注入，這種做法猶如老和尚念經，有口無心，即使繪製數百張符，也如出一轍，或許能以此欺騙顧客，卻無法蒙蔽大氣中能感知信念的鬼神。</p>
+            <p>唯有信念深度足夠，貫穿整張符紙，方能確保其效力。</p>
+            <p>有些人不重視內在修煉，臨到畫符時才匆忙進行內煉，這樣的信念並不純淨。即便那一刻信念純淨，若符氣的根基不穩，也會逐漸消散，當與空氣完全融合時，便會被空氣中的其他緣氣所吸附，變得駁雜不堪，難以提取。</p>
+            
+            <h3 class="article-subtitle">何為天師？</h3>
+            <p>天地認可者即為師。缺德者，天地又如何能認可你？</p>
+            <p>莫再說什麼「內煉是一步步來的」，「我才多大，不著急內煉」之類的藉口。</p>
+            <p>若當下不開始，明日復明日，何其多也。</p>
+            <p>唯有德行達到天地認可，方能獲得天地的認證——神位及其配套的兵馬。</p>
+            <p>這些所謂的兵馬，正是因目睹法師的德行，心生敬重才甘願追隨的。</p>
+            <p>並非如現代人所誤解的，拜了什麼祖師就能立即擁有。那些拜祖師後立即獲得的兵馬，亦是感召於祖師之德之恩而來。既然拜學者隸屬於祖師名下，自然也會受到相應的庇護。這便是其中的原理。</p>
+            <p>真正的天師，非任何人所能賜予此稱號，唯有天地可以。</p>
+            <p>這才是成為天師的真正道路。</p>
+            <p>即便是來自皇家的認證，亦是基於此人能順應民心，走的仍是功德之路。</p>
+
+            <h3 class="article-subtitle">年齡與功德的邏輯</h3>
+            <p>有些人認為必須達到特定年齡才能畫符、讀某某經，這其實是對原理的誤解。</p>
+            <p>畫符不僅需要功德，還需神位的支持，這兩者如同人體的腹部和頭部，四肢則是觀想、法脈等的延伸和加分項。</p>
+            <p>若無腹部，四肢無法獨立存在；若無頭部，身體亦無法行進。</p>
+            <p>普通人功德不足，缺乏內煉，其元神依舊平凡，怎能與天地溝通，使天地為其開路？</p>
+            <p>因此，才有所謂幾歲才能學此符、讀某某經文的說法，這其實是考慮到常人悟性、根器和閱歷等方面的不足而設立的規矩。</p>
+            <p>另一些人則認為，只要書寫並焚燒通關表文於壇前，祖師便會默認同意這門法事。</p>
+            <p>他們認為，只要填好表文、完成匯報，祖師便會自動批准。</p>
+            <p>然而，即便此邏輯成立，符咒在後續生效時，也難以獲得異地神明的認可，本地神明或許會看在祖師面子上給予幾分支持。</p>
+            <p>若法師德行不足以匹配其位，祖師審批下的符力也會相應衰減。</p>
+            <p>審核是一個綜合判斷的過程，除了功德和神位，還需考慮福報、壽命、氣運、緣分、血脈等因素，這些可以相互彌補，如同貸款時可用其他不動產作抵押。</p>
+            <p>這也是為何有些人畫符過程中會出現五弊三缺，因其功德不足只能從其他方面進行抵押。</p>
+            <p>有些人過於注重祖師傳達的形式，卻未曾深究其背後的原理。</p>
+            
+            <h3 class="article-subtitle">禁忌背後的原理</h3>
+            <div class="quote-box">
+                <p class="font-bold text-[#2C2420] mb-2">例子：</p>
+                <p class="text-sm m-0">某位道長曾說：「修煉大皇經時，左手不可觸碰下半身，就連睡覺也要將手綁在床頭，小便時只能使用右手。」</p>
+            </div>
+            <p>這究竟是為何？為何要如此行事？許多人選擇盲目遵從，若提出質疑，彷彿便是對祖師的不敬。然而，這種思維方式並不正確。</p>
+            <p>此處的原理在於，左手主「入」，右手主「出」，兩手氣息的出入方向各有不同。</p>
+            <p>若左手觸碰下半身，尤其是接近私處，私處的緣分便會纏繞於手上，進而侵入內心，干擾心神。將手綁在床頭，正是為了防止夢中無意識的觸碰，以達到徹底的絕緣效果。儘管目前尚未想到更佳的絕緣方法，但這樣做總比心中存疑要好。</p>
+            <p>同理，沐浴齋戒、法場禁止女人、豬狗、孩童入內，以及淨口、淨天地等儀式，都是為了淨化氣息——無論是自身的氣息，還是場地的氣息，從內到外進行全面淨化，以確保氣息的絕緣。</p>
+            
+            <h4 class="font-bold text-[#2C2420] mt-6">關於六十歲的規矩：</h4>
+            <p>「按照傳統規矩，未滿六十歲者不得閱讀皇經，唯有年滿六十後方可誦念。」</p>
+            <p>這究竟是何緣故？歸根究底，仍在於功德與經文。</p>
+            <p>通常，經文所述境界極高，若人知曉其理卻不去踐行，等同於違背自身本心。</p>
+            <p>閱讀經文而不付諸行動，不斷違背經文之道，將消耗自身功德，只能以其他福報氣運作為抵償。</p>
+            <p>長此以往，命運便會因此發生轉變。</p>
+            <p>為了避免這份命中注定的變數，古人告誡須待六十歲花甲之後，人生大局已定，再行閱讀。此時，憑藉此前積累的充足功德與豐富閱歷，方能更好地領悟經文深意，不至於產生誤解。</p>
+            <p>而對於悟性高超之人，則無需等到花甲之年，成年即可閱讀，甚至隨時隨地皆可研習。</p>
+            
+            <h4 class="font-bold text-[#2C2420] mt-6">關於材質：</h4>
+            <p>後面有同學曾問過我，為什麼符可以畫在磚瓦，竹子，牆上，其意同上述之理。</p>
+            <p>符的繪製並不拘泥於特定的材質，磚瓦、竹子、牆壁，皆可承載符之靈力。這是因為符的效力，源自於繪製者的意念與天地之氣的交融，而非材質本身。只要繪製時心懷敬畏，意念專注，使得天地之氣匯聚於符上，那麼無論何種材質，都能成為符的載體，發揮出應有的作用。</p>
+        </section>
+
+        <!-- 四．符的使用禁忌與注意事項 (互動式 Q&A) -->
+        <section id="qa" class="article-content reveal-on-scroll border-t border-[#D6CDC5] pt-12">
+            <h2 class="text-3xl serif font-black text-[#2C2420] mb-8">符的使用禁忌與注意事項</h2>
+
+            <p>符的使用，雖不拘泥於材質，卻有著諸多禁忌與注意事項。</p>
+            <ul class="list-disc pl-5 space-y-2 mb-8">
+                <li>其一，繪製符時，務必保持內心純淨，不可心懷雜念，否則意念不純，難以引動天地之氣，符的效力自然大打折扣。</li>
+                <li>其二，符不可隨意丟棄或踐踏，需妥善保管，以示對天地之氣的尊重。</li>
+                <li>其三，使用符時，需根據具體情境與需求，選擇合適的符咒，不可盲目使用，以免適得其反。</li>
+            </ul>
+
+            <!-- 手風琴互動區塊 -->
+            <div class="space-y-4">
                 
-                <!-- 上篇：教學篇標題 -->
-                <div class="text-center mb-10">
-                    <span class="bg-[#2C2420] text-[#EAE6DE] px-6 py-2 rounded-full serif tracking-widest text-lg">上篇｜教學篇</span>
-                </div>
-
-                <!-- 1. 定義 -->
-                <section id="v2-intro">
-                    <h2 class="text-2xl serif font-bold text-[#2C2420] mb-6">一、道家及民間教派中的過功是什麼？</h2>
-                    <p>道家文化及民間教派中的過功儀式，是兩廣地區民間道法傳承的核心程序，亦稱「過教」或「過法」。其本質是透過師徒間的能量傳遞與身份認證，實現功法傳承的完整閉環。</p>
-                    <p>習法學子必須經過過功儀式，原因在於該儀式具備三重核心作用。</p>
-                </section>
-
-                <!-- 2. 三重核心作用 -->
-                <section id="v2-core">
-                    <h2 class="text-2xl serif font-bold text-[#2C2420] mb-6">二、過功的三重核心作用</h2>
-                    
-                    <h3 class="article-subtitle">（一）身份合法性構建</h3>
-                    <p>師父透過焚燒疏文、念誦請師文，將信息上稟祖師、仙師（法主），使弟子獲得使用本門符咒、修煉本門功夫等等的合法權限。</p>
-                    <p>這種「官方認證」不僅賦予弟子法術使用權，更伴隨「隨身兵馬」或「護法」的隱性能量護持。</p>
-                    <p>例如，某些門派要求弟子僅穿短褲接受封身畫符，師父用香火在前後左右各畫 9 道符號，共 36 道，部分門派還會在頭頂腳底加封，形成能量結界。</p>
-
-                    <h3 class="article-subtitle">（二）能量通道激活</h3>
-                    <p>師父透過強力打通弟子身上的氣路，建立內外能量交換的通道。</p>
-                    <p>每種功夫對應特定氣路，如防身制敵類武法需打通多條氣路，而治病祈福類文法可能僅需打通單一氣路。</p>
-                    <p>以「過掌」為例，師父先將特定符號畫於自己掌心，再壓入弟子掌心。弟子握拳保存後，師父用香火重複畫符強化，確保能量精準注入。</p>
-
-                    <h3 class="article-subtitle">（三）功力躍遷式提升</h3>
-                    <p>師父將多年修煉的功力透過「吞符」「血傳」等方式強行灌注弟子體內。</p>
-                    <p>例如，師父用朱砂在黃紙上畫符，令弟子焚化於水中吞服；或透過割破手掌、印堂等部位，與弟子進行血液交融，實現血脈相傳。</p>
-                    <p>部分高階儀式甚至無需複雜操作，師父僅需一句：「這個功夫傳給某某了，你可以用了」，弟子即可瞬間獲得功力——此即「口教心傳」之法，但僅限具備極高能量的師父使用。</p>
-                </section>
-
-                <!-- 3. 作用及意義 -->
-                <section id="v2-meaning">
-                    <h2 class="text-2xl serif font-bold text-[#2C2420] mb-6">三、過功儀式的作用與傳承意義</h2>
-                    <p>過功儀式的意義遠超技術傳遞，它構建了完整的傳承體系：</p>
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div class="bg-white p-4 border-l-4 border-[#8C3224]">
-                            <strong class="block text-[#2C2420] serif mb-2">其一，確保功法效力</strong>
-                            <span class="text-sm">未經過功的弟子，即便對符咒（花字）倒背如流，也無法激發任何效果。</span>
+                <!-- Q1 -->
+                <details class="group bg-[#fff] border border-[#D6CDC5] overflow-hidden rounded-sm shadow-sm">
+                    <summary class="flex items-center justify-between p-5 cursor-pointer bg-[#F9F7F5] hover:bg-[#EAE6DE] transition select-none">
+                        <div class="flex gap-3">
+                            <span class="text-[#8C3224] font-bold">Q.</span>
+                            <h4 class="font-bold text-[#2C2420] m-0">符放在手機殼後效果減少一半時效性是為什麼？</h4>
                         </div>
-                        <div class="bg-white p-4 border-l-4 border-[#8C3224]">
-                            <strong class="block text-[#2C2420] serif mb-2">其二，降低修煉門檻</strong>
-                            <span class="text-sm">多數功法過功後即可使用，弟子無需從零開始修煉，僅需定期供奉祖師即可維持功力。</span>
+                        <span class="text-[#8C3224] transform group-open:rotate-180 transition-transform duration-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </span>
+                    </summary>
+                    <div class="p-6 text-sm text-[#5C4D46] border-t border-[#D6CDC5]">
+                        <p class="font-bold text-[#2C2420] mb-2">A：符放置於手機殼後效果減弱且時效性減半，這一現象與能量場干擾密切相關。</p>
+                        <p>現代電子設備運行時會產生特定頻率的電磁場，而符咒的靈力本質是微妙的能量波動。當符咒緊貼手機殼時，電子設備的電磁場會與符咒的靈力場形成疊加或抵消效應，導致能量分佈紊亂。</p>
+                        <p>此外，手機作為高頻使用物品，其表面常附著使用者散發的雜亂意念，這種無意識的能量殘留會稀釋符咒的純淨度，進而影響其發揮效能的穩定性。</p>
+                    </div>
+                </details>
+
+                <!-- Q2 -->
+                <details class="group bg-[#fff] border border-[#D6CDC5] overflow-hidden rounded-sm shadow-sm">
+                    <summary class="flex items-center justify-between p-5 cursor-pointer bg-[#F9F7F5] hover:bg-[#EAE6DE] transition select-none">
+                        <div class="flex gap-3">
+                            <span class="text-[#8C3224] font-bold">Q.</span>
+                            <h4 class="font-bold text-[#2C2420] m-0">符為什麼不能放在屁股口袋這些地方？</h4>
                         </div>
-                        <div class="bg-white p-4 border-l-4 border-[#8C3224]">
-                            <strong class="block text-[#2C2420] serif mb-2">其三，強化師徒羈絆</strong>
-                            <span class="text-sm">文過需在法壇前完成，武過則需在野外或高山頂進行，這種嚴苛的儀式流程加深了師徒間的精神聯結。</span>
+                        <span class="text-[#8C3224] transform group-open:rotate-180 transition-transform duration-300">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </span>
+                    </summary>
+                    <div class="p-6 text-sm text-[#5C4D46] border-t border-[#D6CDC5]">
+                        <p class="font-bold text-[#2C2420] mb-2">A：符不宜放置於屁股口袋等位置，主要基於能量場與人體氣場的交互原理。</p>
+                        <p>人體存在生物電磁場，其中丹田、命門等穴位是能量匯聚的核心區域，而臀部因骨骼結構與肌肉分佈，形成相對封閉的能量凹陷區。</p>
+                        <p>當符咒貼身放置於臀部口袋時，其靈力場會被人體凹陷區的能量漩渦吸收，導致靈力循環受阻。</p>
+                        <p>同時，日常行走或坐臥時，臀部與衣物的頻繁摩擦會產生靜電干擾，進一步破壞符咒的能量結構穩定性。</p>
+                        <p>此外，從傳統認知框架來看，臀部區域在人體能量場中屬於「濁氣下沉」的末端，將符咒置於此處易沾染濁氣，違背了「符需存於清淨處」的基本原則。</p>
+                    </div>
+                </details>
+
+                <!-- Q3 -->
+                <details class="group bg-[#fff] border border-[#D6CDC5] overflow-hidden rounded-sm shadow-sm">
+                    <summary class="flex items-center justify-between p-5 cursor-pointer bg-[#F9F7F5] hover:bg-[#EAE6DE] transition select-none">
+                        <div class="flex gap-3">
+                            <span class="text-[#8C3224] font-bold">Q.</span>
+                            <h4 class="font-bold text-[#2C2420] m-0">符被寵物咬壞，被人撕了，弄丟了，被水弄濕了等，為什麼？該怎麼做？</h4>
                         </div>
-                        <div class="bg-white p-4 border-l-4 border-[#8C3224]">
-                            <strong class="block text-[#2C2420] serif mb-2">其四，維護門派權威</strong>
-                            <span class="text-sm">過功次數越多，功力越強，只有透過考驗的弟子才能獲得多次過功機會，保障了功法傳承的純粹性。</span>
+                        <span class="text-[#8C3224] transform group-open:rotate-180 transition-transform duration-300">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </span>
+                    </summary>
+                    <div class="p-6 text-sm text-[#5C4D46] border-t border-[#D6CDC5]">
+                        <p class="font-bold text-[#2C2420] mb-2">A：符作為承載特殊能量的靈物，其完整性直接關係到能量場的穩定。</p>
+                        <p>當符被寵物咬壞、人為撕毀或丟失時，本質是能量載體遭受物理性破壞，導致靈力場出現裂隙或逸散。</p>
+                        <p>以寵物撕咬為例，動物感知系統對能量波動更為敏感，咬破符紙的行為可能是對異常能量場的本能排斥反應；而人為撕毀則屬於主動破壞能量契約，會引發更劇烈的靈力反噬。若符不慎被水浸湿，墨跡中的朱砂成分與水分子結合後，會改變符咒的電磁共振頻率，造成靈力結構解體。</p>
+                        
+                        <div class="bg-[#F9F7F5] p-4 mt-4 rounded border border-[#EAE6DE]">
+                            <strong class="block mb-2 text-[#8C3224]">處理方式：</strong>
+                            <p>發現符咒受損後，應立即用紅布包裹殘片，置於潔淨處焚化，焚化時需默念「天地清明，符歸本源」三遍，次日需重新請符。</p>
+                            <p>並在子時（23:00-1:00）面向東方，將新符置於掌心，用左手拇指順時針畫符咒核心圖案九遍，完成能量重置儀式。</p>
+                            <p>若符咒丟失，需在三日內用艾草水清潔居住空間，並在丟失處放置七枚銅錢形成臨時防護陣，防止能量場出現空白期。</p>
                         </div>
                     </div>
-                </section>
+                </details>
 
-                <!-- 4. 盜法與詛咒 -->
-                <section id="v2-stealing">
-                    <h2 class="text-2xl serif font-bold text-[#2C2420] mb-6">四、禁止盜法傳法與不正統法脈</h2>
-                    
-                    <h3 class="article-subtitle">（一）禁止盜法傳法的根本意義</h3>
-                    <p>禁止盜法傳法意義重大，它從根源上保障了門派功法傳承的有序性與純粹性。</p>
-                    <p>若盜法傳法之風盛行，功法可能會被肆意傳播、濫用，甚至被心懷不軌之人利用來謀取私利，這會嚴重破壞門派功法的獨特價值與神秘性，進而損害門派的整體利益與聲譽。</p>
-
-                    <h3 class="article-subtitle">（二）「詛咒」的象徵與心理威懾</h3>
-                    <p>設置詛咒並非毫無作用，它是一種強大的精神威懾力量。</p>
-                    <p>在傳統觀念裡，詛咒被認為具有神秘且強大的力量，能對違反規定者產生心理上的巨大壓力，使其不敢輕易觸碰紅線，從而有效維護門派規矩的嚴肅性。</p>
-
-                    <h3 class="article-subtitle">（三）盜法傳法與因果規律</h3>
-                    <p>偷偷盜法傳法，即便師父當下不知，但法界自有其運行規則與因果循環。</p>
-                    <p>從長遠來看，這種違背門派規矩、破壞傳承秩序的行為，往往會引發一系列不良後果。</p>
-                    <ul class="list-disc pl-5 space-y-2">
-                        <li>盜法者自身可能因違背天地法則而遭受反噬，在修煉過程中遭遇重重阻礙，難以精進；</li>
-                        <li>其所傳授之人，也可能因缺乏正規的傳承與引導，無法真正領悟功法精髓，甚至可能因誤用功法而走火入魔。</li>
-                    </ul>
-                    <p>而且，這種行為一旦被發現，盜法者將面臨門派嚴厲的懲處，以儆效尤。</p>
-
-                    <h3 class="article-subtitle">（四）不正統法脈與錯誤過功的後果</h3>
-                    <p>如果學習的是不正統的法脈，過功儀式是錯的，或者傳法者是盜取來的法脈，會有什麼後果？</p>
-                    <p>不僅學習者難以獲得真正的功力提升，無法領悟功法真諦，還可能因誤入歧途而遭受不可預知的傷害。</p>
-                    <p>對於傳法者而言，盜取法脈、傳播不正統功法，是對門派權威的公然挑釁與破壞。一旦被門派察覺，必將遭受嚴懲，輕則被逐出師門，重則可能面臨更為殘酷的刑罰，以維護門派的尊嚴與規矩的嚴肅性。</p>
-                </section>
-
-                <!-- 5. 立意與先天 (重點觀念) -->
-                <section id="v2-intention">
-                    <h2 class="text-2xl serif font-bold text-[#2C2420] mb-6">五、立意與先天：修行的核心關係</h2>
-                    
-                    <h3 class="article-subtitle">（一）什麼是立意？</h3>
-                    <p class="font-bold text-[#8C3224] text-lg text-center my-4">「立意，方能獨行於天地間。」</p>
-                    <p>所謂立意，從字面上理解，即是將「意」樹立起來，將「意」點亮，使我們的真心擺脫迷相的束縛，回歸最真最初的狀態，並找到當下的使命，這便是立意。</p>
-                    <p>立意，猶如在心中點燃一盞靈光，保持這盞金光不滅，便是確立了「真意」，因此，立意也象徵著元神的覺醒。</p>
-                    <p>立意，不僅覺醒了我們的神意，更是將元神「站立」起來，不再隨波逐流，從而孕育出獨立的見解，即獨立思考與辨別是非的能力，這需要豐富的閱歷作為支撐。</p>
-                    <p>唯有立意、立「一」，專心致志，一意貫之，方能開啟天地之門，與天地建立起冥冥中的聯繫，領受天意的指引。</p>
-                    <p>在畫符之道中，立意同樣至關重要，若沒有一顆明鏡般清澈的心，怎能從紛繁眾生中超脫而出，承接真正的神靈之力？恐怕早已迷失在紛擾之中。</p>
-                    <p>因此，唯有懷揣真誠之心，凝聚金光之意，方能無畏外界千難萬阻，獨自前行。</p>
-
-                    <h3 class="article-subtitle">（二）立意與「萬神扶助」</h3>
-                    <p>立意是使命覺醒的起點，其重要性並非止步於此。</p>
-                    <p>在燈芯不滅的基礎上，於現實中逐步驗證，將確立的「意」置於風雨中磨礪，檢驗其是否出自真心真意。</p>
-                    <p>真金不怕火煉，只要真意不渝，德行相配，邪魔歪道便無法侵擾。</p>
-                    <p>此時，再依內法修行，以七日為一週期，行事如有神助，種種機緣皆安排得當，此謂「萬神扶助」。</p>
-                    <p>因立意已成，有了連接點，神力之助方能穩定抵達身心，切實助修行人實現願望，甚至引動天象。</p>
-                    <p>在一定程度上，立意亦可視為「明理」的深化。明理即明辨道理，辨識是非，具備足夠的見解以鑑別真假。</p>
-                    <p>而立意，則是在明辨是非的基礎上，提出獨屬於自己的思想體系，並輔以獨特的模型或導圖結構予以支撐。因此，立意即是覺醒內心的光芒，點亮黑夜中的明燈，使之在黑暗中長明不滅。</p>
-                    
-                    <div class="bg-[#F9F7F5] p-6 border border-[#D6CDC5] my-6">
-                        <strong class="block mb-2 text-[#2C2420]">比喻：</strong>
-                        <p class="m-0 text-sm">這裡就像我們喜歡一個陌生異性，在我們尚未深入了解對方時，內心會充滿好奇與憧憬... 同樣，在修煉的歷程中，當我們初步確立立意，就如同對這陌生異性有了最初的心動。隨著在現實中不斷驗證立意，就仿佛是在與這「陌生異性」逐漸熟悉、深入了解。</p>
-                        <p class="mt-4 m-0 text-sm">當發現立意出自真心真意，且能經受住重重考驗，就如同確認了對這陌生異性的感情是真摯且堅定的... 進而確認身份，結婚拜天地。</p>
-                    </div>
-
-                    <p>在修煉的語境中，這就如同在門派中透過嚴格的考驗與認證，獲得正式且尊崇的身份地位。如同婚禮上拜天地，是對天地規則的敬畏與遵循，在門派裡維護權威也是對門派傳承與規矩的尊崇。</p>
-                    <p>以明確的規則和儀式，讓每一位成員都清楚自身的位置與責任，從而確保門派的整體秩序與凝聚力，使門派在江湖中屹立不倒，傳承不息。</p>
-
-                    <h3 class="article-subtitle">（三）立意之前：先要「明意」、也就是明心</h3>
-                    <p>在立意之前，首先需要明意，也就是明心。</p>
-                    <p>明心，首要的是找到一個清靜的時機。關於清靜，不妨引用道家《清靜經》中的一段話，希望能對立意有所助益：</p>
-                    <div class="quote-block text-center text-lg leading-relaxed text-[#2C2420]">
-                        「夫，人神好清而心擾之。<br>
-                        人心好靜，而欲牽之。<br>
-                        常能遣其欲，而心自靜；<br>
-                        澄其心，而神自清。<br>
-                        自然六欲不生，三毒消滅。」
-                    </div>
-                    <p>這段話的含義是什麼呢？從字面上看，神不清是因為心在干擾，心不靜則是因為欲望在牽動。</p>
-                    <p>這裡呈現的是一個遞進關係：先是外界的欲望干擾了心，心隨之動搖，進而干擾了居於心宮的神，即形成了「欲—心—神」這一連鎖反應。</p>
-
-                    <h3 class="article-subtitle">（四）大機器與「小人」：拴心猿、伏意馬</h3>
-                    <p>舉個例子：人體猶如一部精密的大機器，心臟便是控制台，而神識則是控制台中的那個「小人」。</p>
-                    <p>當人體遭受外部攻擊時，控制台螢幕會顯示相應畫面，「告知」小人需啟動防禦或其他應對措施。提升小人的控制能力，使其既不驚慌失措，也不肆意妄為，而是將其牢牢掌控。</p>
-                    <p>道家將此稱為「拴心猿，伏意馬」，抱元守一；儒家則稱之為「執中」，不偏不倚，不上不下。</p>
-                    <p>透過這種方式，提升人體大機器的全方位防禦力、靈活度和持久性（即「命」），使肉身更為強健，從而更加長壽地承載我們的內在靈魂，擁有更多時間去錘鍊元神。</p>
-                    <p>為此，有一門正統的長生法門，名為「丹道」，有興趣者不妨深入了解一番。</p>
-
-                    <h3 class="article-subtitle">（五）「人神好清，而心擾之」與欲望</h3>
-                    <p><strong>「人神好清，而心擾之」：</strong>當人的神志清醒、氣息爽朗時，便會感到自然惬意，因為「清」是神原本的狀態，正如嬰兒時期那般。</p>
-                    <p>然而，後天的心常常妄動，對各種事物充滿好奇，無法安定，從而干擾了神的先天清靜，阻礙了修行的進程。這也說明，修心是修神的基礎。</p>
-                    <p>中醫典籍《黃帝內經》中提到：「心者，生之本，神之處也」，心藏神，是生命和精神的根本所在。</p>
-                    <p><strong>「人心好靜，而欲牽之」：</strong>心其實與神一樣，渴望享受清靜。但為何心常妄動？顯然這與人的欲望密切相關。</p>
-                    <p>心本身是不動的，而欲望卻無處不在，誘惑你沉淪。因此，用「牽之」來形容，如同牽牛溜狗一般，欲望牽動著你的心，使你難以獲得清靜。</p>
-                    <p>要達到清靜，必須制約欲望，只有心不被外界牽動打擾，居於心官內的神才能安然自若。</p>
-                    <p>《黃帝內經》也曾提到「精神內守，恬淡虛無」的養生修行準則。</p>
-
-                    <h3 class="article-subtitle">（六）先天狀態何時出現？起床、手機與夢境</h3>
-                    <p>最後，談談先天的出現時機：所謂先天，道家稱之為「清靜之後，過玄關而為先天」。</p>
-                    <p>其實，每天剛起床時便是先天狀態，此時還未進入紛擾的紅塵，頭腦清醒，思緒不多。</p>
-                    <p>然而，隨著我們打開手機，各種文字、氣息偏好、色彩等逐漸侵入心中，對我們原本潔白的心態點綴上色彩，引動先天狀態逐漸消退。</p>
-                    <p>先天是清靜的，身體活動則染上塵埃，思維增多則思緒紛飛。</p>
-                    <p>因此，大部分時間我們只能透過回光收心，即減少光線照射，斬除心中雜念，來達到相對的清靜，減少外界干擾。</p>
-                    <p>小到一個動作、一句話、一個念頭，都会影響剛起床時的先天狀態。</p>
-                    <p>例如，起床時手臂的擺動，頭部微微抬起等小動作，雖微不足道，但對於剛起床時的純淨狀態，卻是顯著的干擾。</p>
-                    <p>在剛起床時，心中出現的任何一個思維都容易被捕捉，無論好壞，都能清晰地觀察。此時也是修行的好時機，有助於直面恐懼，直面心中的不足。</p>
-                    <p>夢境同樣是我們直面恐懼的場所，夢境中的反應都是心底的第一反應，被放大後感同身受。若能在剛睡醒的先天狀態中好好回憶夢中的言行，便能第一時間發現問題，反省自身。</p>
-                    <p>這是一段寶貴的時間，今日點出，望各位修真者有所收穫，進道無魔。</p>
-                </section>
-
-                <div class="border-t border-[#2C2420] my-12"></div>
-
-                <!-- 下篇：Q&A 標題 -->
-                <div class="text-center mb-10">
-                    <span class="bg-[#2C2420] text-[#EAE6DE] px-6 py-2 rounded-full serif tracking-widest text-lg">下篇｜Q&A 常見問答篇</span>
-                </div>
-
-                <!-- Q&A 手風琴區塊 -->
-                <section id="v2-qa" class="space-y-4">
-                    
-                    <!-- Q1 -->
-                    <details class="group bg-white border border-[#D6CDC5] rounded-sm shadow-sm">
-                        <summary class="flex justify-between items-center p-5 cursor-pointer bg-[#F9F7F5] hover:bg-[#EAE6DE] transition select-none">
-                            <span class="font-bold text-[#2C2420] pr-4">Q1. 異人研究院的符法過功的作用意義及原理性，依據什麼？</span>
-                            <span class="text-[#8C3224] transform group-open:rotate-180 transition-transform duration-300">▼</span>
-                        </summary>
-                        <div class="p-6 text-sm text-[#5C4D46] border-t border-[#D6CDC5] bg-white">
-                            <p>異人研究院符法過功的作用意義，在於透過嚴謹規範的儀式流程，確保功法傳承的合法性與純粹性，維護門派在功法傳承方面的權威地位。</p>
-                            <p>其原理基於對天地能量運行規律的精準把握，以及對門派傳承體系的深度遵循。</p>
-                            <p>通絡是為了讓能量在師徒之間順暢流通，構建穩固的能量傳輸通道；「解」則是解開功法傳承中的各種限制與束縛，使功法能完整且準確地傳遞。</p>
-                        </div>
-                    </details>
-
-                    <!-- Q2 -->
-                    <details class="group bg-white border border-[#D6CDC5] rounded-sm shadow-sm">
-                        <summary class="flex justify-between items-center p-5 cursor-pointer bg-[#F9F7F5] hover:bg-[#EAE6DE] transition select-none">
-                            <span class="font-bold text-[#2C2420] pr-4">Q2. 通絡和「其解」是什麼？立意與先天的志在於哪？</span>
-                            <span class="text-[#8C3224] transform group-open:rotate-180 transition-transform duration-300">▼</span>
-                        </summary>
-                        <div class="p-6 text-sm text-[#5C4D46] border-t border-[#D6CDC5] bg-white">
-                            <ul class="list-disc pl-5 space-y-2 mb-4">
-                                <li><strong>通絡：</strong>是讓能量在師徒之間順暢流通，建立並穩固能量傳輸通道的過程。</li>
-                                <li><strong>其解：</strong>是解開在功法傳承中存在的限制與束縛，讓符法與功夫得以完整、準確地落到修行人身上。</li>
-                            </ul>
-                            <p class="font-bold mb-2">至於 立意與先天的志在於哪裡：</p>
-                            <ul class="list-disc pl-5 space-y-2">
-                                <li><strong>立意：</strong>是讓元神站立起來、點亮真意，使人不再隨波逐流，而能獨立思考、辨別是非，並與天地建立起冥冥中的聯繫。</li>
-                                <li><strong>先天：</strong>是在清靜狀態中顯現的本來面目，每天剛起床、尚未被紅塵資訊污染之前，就是接近先天的一個關鍵時刻。</li>
-                                <li><strong>二者結合：</strong>有立意，才能穩住先天；守住先天，立意才不會被後天雜欲牽走。</li>
-                            </ul>
-                        </div>
-                    </details>
-
-                    <!-- Q3 -->
-                    <details class="group bg-white border border-[#D6CDC5] rounded-sm shadow-sm">
-                        <summary class="flex justify-between items-center p-5 cursor-pointer bg-[#F9F7F5] hover:bg-[#EAE6DE] transition select-none">
-                            <span class="font-bold text-[#2C2420] pr-4">Q3. 以我這樣的命格，為什麼可以開創這些東西？有用嗎？</span>
-                            <span class="text-[#8C3224] transform group-open:rotate-180 transition-transform duration-300">▼</span>
-                        </summary>
-                        <div class="p-6 text-sm text-[#5C4D46] border-t border-[#D6CDC5] bg-white">
-                            <p>傷官見官等特殊命理格局，賦予我獨特的天賦與使命，讓我有開創全新功法體系的魄力與能力。</p>
-                            <p>我開創的這些東西，是經過實踐檢驗且符合門派發展需求的，具有實用價值。</p>
-                        </div>
-                    </details>
-
-                    <!-- Q4 -->
-                    <details class="group bg-white border border-[#D6CDC5] rounded-sm shadow-sm">
-                        <summary class="flex justify-between items-center p-5 cursor-pointer bg-[#F9F7F5] hover:bg-[#EAE6DE] transition select-none">
-                            <span class="font-bold text-[#2C2420] pr-4">Q4. 你們跟隨我學習，對你們有什麼利弊？</span>
-                            <span class="text-[#8C3224] transform group-open:rotate-180 transition-transform duration-300">▼</span>
-                        </summary>
-                        <div class="p-6 text-sm text-[#5C4D46] border-t border-[#D6CDC5] bg-white">
-                            <p class="font-bold text-[#8C3224]">利在於：</p>
-                            <ul class="list-disc pl-5 mb-4">
-                                <li>能接觸到獨特且有效的功法。</li>
-                                <li>透過嚴謹的儀式與體系，獲得更廣闊的發展空間。</li>
-                                <li>修行不只是「技術操作」，而是連同立意、心性一併調整。</li>
-                            </ul>
-                            <p class="font-bold text-[#8C3224]">弊在於：</p>
-                            <ul class="list-disc pl-5">
-                                <li>若自身無法適應這樣獨特而嚴格的教學與傳承方式，可能在修煉過程中遇到困難與挑戰。</li>
-                                <li>若不願意面對自身的欲望、心性問題，也會覺得這樣的修行過程壓力巨大。</li>
-                            </ul>
-                        </div>
-                    </details>
-
-                    <!-- Q5 -->
-                    <details class="group bg-white border border-[#D6CDC5] rounded-sm shadow-sm">
-                        <summary class="flex justify-between items-center p-5 cursor-pointer bg-[#F9F7F5] hover:bg-[#EAE6DE] transition select-none">
-                            <span class="font-bold text-[#2C2420] pr-4">Q5. 那些起床氣嚴重的人，怎麼解釋？</span>
-                            <span class="text-[#8C3224] transform group-open:rotate-180 transition-transform duration-300">▼</span>
-                        </summary>
-                        <div class="p-6 text-sm text-[#5C4D46] border-t border-[#D6CDC5] bg-white">
-                            <p>起床氣看似是個人情緒的小問題，實則與個人的身心狀態和自我調節能力緊密相關。</p>
-                            <p>每個人都應秉持對自身狀態的覺察之心，以平和、寧靜之態開啟新的一天。</p>
-                            <p>若因起床氣而煩躁不安，不僅破壞了自身的先天狀態，影響日常狀態的穩定，更可能對周圍人產生不良影響，擾亂生活中的和諧氛圍。</p>
-                            <p>對於起床氣嚴重者，應主動進行自我引導與調整，透過適當的身心調適方法，幫助自己克服這一不良情緒，以更好地保持內在的平和狀態。</p>
-                            <p class="font-bold mt-2 text-[#8C3224]">總結一句：其欲重，心神不寧，而牽之。</p>
-                        </div>
-                    </details>
-
-                    <!-- Q6 -->
-                    <details class="group bg-white border border-[#D6CDC5] rounded-sm shadow-sm">
-                        <summary class="flex justify-between items-center p-5 cursor-pointer bg-[#F9F7F5] hover:bg-[#EAE6DE] transition select-none">
-                            <span class="font-bold text-[#2C2420] pr-4">Q6. 為何每位學子都必須上「極其費時的文化課」？</span>
-                            <span class="text-[#8C3224] transform group-open:rotate-180 transition-transform duration-300">▼</span>
-                        </summary>
-                        <div class="p-6 text-sm text-[#5C4D46] border-t border-[#D6CDC5] bg-white">
-                            <p>文化課絕非可有可無之設置，而是傳承知識體系、夯實個人認知根基的關鍵所在。</p>
-                            <p>每一次文化課，都承載著人類文明的智慧結晶，是學子門生了解學科歷史、構建知識框架、培養獨立思考能力的重要途徑。若忽略此步驟，學子門生便如同無根之木、無源之水，難以真正領悟知識的本質與價值，更難以在探索之路上走得長遠。</p>
-                            <p>因此，文化課不僅不可忽略，反而應倍加重視，確保每一位門生都能從中汲取養分，為日後的成長之路奠定堅實基礎。</p>
-                            
-                            <div class="bg-[#F9F7F5] p-4 mt-4 mb-4 border-l-2 border-[#2C2420]">
-                                <strong class="block mb-2">文化課關乎「立意」，進而實現精神共通與身外化身的境界。</strong>
-                                <p class="m-0">畢竟，這世界上沒有人會無聊到極點、閒散到如此地步，去說一些毫無意義的話來浪費你們寶貴的學習時間。</p>
-                            </div>
-
-                            <p>既然我們是傳承者與被傳承者的關係，我深入講講「精神共通與身外化身」的意義：</p>
-                            <ul class="list-disc pl-5 mb-4">
-                                <li>我們每個人在內心深處是相互連接的。</li>
-                                <li>當我們心意相通時，以修為作為橋樑，便能在瞬息之間感知他人的心願等信息。</li>
-                                <li>這種感知並非直接獲取信息中的每一個字句，而是在行動中的一種默契與感召。</li>
-                            </ul>
-                            <p>例如，在行善的過程中，兩個素不相識的人，若都懷有向善之心，並在實際行動中踐行，那麼無論他們身處何地，都会踏上同一條軌跡，彼此逐漸靠攏，最終相遇。</p>
-                            <p>許多人將這個最核心的領域稱為「集體意識」。當我們深入其中並能夠感知他人時，天地便會賦予我們一個特殊的標記。這個標記類似於一種管理者的角色，而我更傾向於將其稱為「神位」，這是與天地溝通的最基礎位置，由此，化身的過程便得以展開。</p>
-
-                            <p class="font-bold mt-4 mb-2">關於身外化身：</p>
-                            <p>化身在眾多小說中表現為分化出一個與自己如出一轍的分身，憑藉相似的能力協助自身完成任務。</p>
-                            <p>當兩人的信念高度契合，並在集體意識中得到認可時，他們的言行舉止便如同出自同一模子，從而形成了所謂的「身外化身」。儘管他們的肉身各異，但所傳遞的精神文化與行為模式卻極為相似，這正是「身外化身」的精髓所在。</p>
-                            <p>這種獨特的師徒關係，使得核心精神得以完整且純粹地傳承下去，不會因個體的差異或外界的干擾而出現斷層或偏離，進而確保了理念和技藝在歲月的長河中始終保持著鮮活的生命力。</p>
-                            
-                            <p class="text-[#8C3224] font-bold mt-6 text-center">因此，大家現在應當能夠理解，為何異人研究院在完成傳統的過功儀式之後，仍需進一步深化立意，並強化精神與身外化身的共通意義。</p>
-                        </div>
-                    </details>
-                </section>
-
-                <div class="text-center py-8">
-                    <button onclick="switchTab(1)" class="bg-transparent border border-[#2C2420] text-[#2C2420] px-8 py-3 rounded-full hover:bg-[#2C2420] hover:text-[#EAE6DE] transition-colors serif tracking-widest">
-                        ← 返回卷一：符咒篇
-                    </button>
+                <div class="bg-[#2C2420] text-[#EAE6DE] p-4 text-center text-sm rounded-sm mt-6">
+                    注：佩戴符咒的善信收到符咒即日起的一年後朝東方燒掉，並禱告。
                 </div>
             </div>
-        </article>
+        </section>
+
     </main>
 
     <footer class="bg-[#2C2420] text-[#D6CDC5] py-16 px-6 mt-12 text-center space-y-6">
-        <div class="serif text-3xl tracking-[0.3em] text-[#EAE6DE]">異人研究院xLuna寵物溝通師</div>
+        <div class="serif text-3xl tracking-[0.3em] text-[#EAE6DE]">異人研究院</div>
         <p class="text-xs tracking-widest uppercase opacity-50">Yiren Research Institute</p>
         <div class="w-12 h-[1px] bg-[#EAE6DE] mx-auto opacity-30"></div>
         <p class="text-xs text-[#8C837D] leading-loose max-w-lg mx-auto">
@@ -628,104 +492,26 @@
     <script>
         gsap.registerPlugin(ScrollTrigger);
 
-        // 卷目錄數據
-        const tocData = {
-            1: [
-                { id: "v1-intro", title: "常規製作及原理" },
-                { id: "v1-function", title: "意義與作用" },
-                { id: "v1-eye", title: "一・目光感應" },
-                { id: "v1-endowment", title: "二・賦予法則" },
-                { id: "v1-principle", title: "三・生效原理" },
-                { id: "v1-qa", title: "四・禁忌與問答" }
-            ],
-            2: [
-                { id: "v2-intro", title: "一・過功是什麼" },
-                { id: "v2-core", title: "二・三重核心作用" },
-                { id: "v2-meaning", title: "三・作用及意義" },
-                { id: "v2-stealing", title: "四・盜法與詛咒" },
-                { id: "v2-intention", title: "五・立意與先天" },
-                { id: "v2-qa", title: "下篇・Q&A 問答" }
-            ]
-        };
-
-        // 當前卷
-        let currentVol = 1;
-
-        // 初始化動畫
-        function initAnimations() {
-            const revealElements = document.querySelectorAll('.page-enter .article-content > section, .page-enter header, .page-enter .group');
-            revealElements.forEach((element) => {
-                gsap.fromTo(element, 
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.8,
-                        ease: "power2.out",
-                        scrollTrigger: {
-                            trigger: element,
-                            start: "top 95%",
-                            toggleActions: "play none none reverse"
-                        }
+        // 1. Reveal Animation
+        const revealElements = document.querySelectorAll('.reveal-on-scroll');
+        revealElements.forEach((element) => {
+            gsap.fromTo(element, 
+                { opacity: 0, y: 30 },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.8,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: element,
+                        start: "top 95%",
+                        toggleActions: "play none none reverse"
                     }
-                );
-            });
-            ScrollTrigger.refresh();
-        }
+                }
+            );
+        });
 
-        // 切換分頁 (Tab)
-        function switchTab(vol) {
-            currentVol = vol;
-            const vol1 = document.getElementById('volume-1');
-            const vol2 = document.getElementById('volume-2');
-            const tab1 = document.getElementById('tab-1');
-            const tab2 = document.getElementById('tab-2');
-
-            // 滾動到頂部
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-
-            if (vol === 1) {
-                vol1.classList.remove('hidden');
-                vol2.classList.add('hidden');
-                tab1.classList.add('tab-active');
-                tab1.classList.remove('tab-inactive');
-                tab2.classList.remove('tab-active');
-                tab2.classList.add('tab-inactive');
-            } else {
-                vol1.classList.add('hidden');
-                vol2.classList.remove('hidden');
-                tab2.classList.add('tab-active');
-                tab2.classList.remove('tab-inactive');
-                tab1.classList.remove('tab-active');
-                tab1.classList.add('tab-inactive');
-            }
-
-            updateSidebar();
-            setTimeout(initAnimations, 100);
-        }
-
-        // 更新側邊欄目錄
-        function updateSidebar() {
-            const container = document.getElementById('sidebar-links');
-            container.innerHTML = '';
-            const links = tocData[currentVol];
-            links.forEach(link => {
-                const a = document.createElement('a');
-                a.href = `#${link.id}`;
-                a.className = "menu-link text-xl serif hover:text-[#8C3224] transition-colors block py-1 cursor-pointer";
-                a.textContent = link.title;
-                a.onclick = (e) => {
-                    e.preventDefault();
-                    document.querySelector(a.getAttribute('href')).scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                    toggleMenu();
-                };
-                container.appendChild(a);
-            });
-        }
-
-        // 進度條
+        // 2. Progress Bar
         window.addEventListener('scroll', () => {
             const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
             const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
@@ -733,10 +519,11 @@
             document.getElementById('progress-bar').style.width = scrolled + '%';
         });
 
-        // 菜單開關
+        // 3. Menu Interactions
         const menuBtn = document.getElementById('menu-btn');
         const closeMenu = document.getElementById('close-menu');
         const sidebar = document.getElementById('sidebar');
+        const menuLinks = document.querySelectorAll('.menu-link');
 
         function toggleMenu() {
             const isClosed = sidebar.classList.contains('translate-x-full');
@@ -751,24 +538,7 @@
 
         menuBtn.addEventListener('click', toggleMenu);
         closeMenu.addEventListener('click', toggleMenu);
-
-        // 初始運行
-        updateSidebar();
-        initAnimations();
-
-        // 導航欄滾動效果
-        let lastScroll = 0;
-        window.addEventListener('scroll', () => {
-            const currentScroll = window.pageYOffset;
-            const navbar = document.getElementById('navbar');
-            if (currentScroll > lastScroll && currentScroll > 100) {
-                navbar.style.transform = 'translateY(-100%)';
-            } else {
-                navbar.style.transform = 'translateY(0)';
-            }
-            lastScroll = currentScroll;
-        });
-
+        menuLinks.forEach(link => link.addEventListener('click', toggleMenu));
     </script>
 </body>
 </html>
